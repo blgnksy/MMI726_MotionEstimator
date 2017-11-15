@@ -1,9 +1,6 @@
 import cv2
 import numpy as np
 
-print(cv2.__version__)
-print(np.__version__)
-
 #BLOCK_SIZE
 BLOCK_SIZE=16
 #SEARCH_WINDOWS_SIZE
@@ -15,10 +12,15 @@ F_COUNT=0
 
 
 def motionEstimator(frame1, frame2,f_count):
-    refBlock=np.zeros(((16,16,3)),np.uint8)
-    searchBlock = np.zeros(((16, 16, 3)), np.uint8)
+    refBlock=np.zeros(((BLOCK_SIZE,BLOCK_SIZE,3)),np.uint8)
+    searchBlock = np.zeros(((BLOCK_SIZE, BLOCK_SIZE, 3)), np.uint8)
+    motionVector=np.zeros((F_HEIGTH/BLOCK_SIZE,F_WIDTH/BLOCK_SIZE,4))
     for i in range(F_HEIGTH/BLOCK_SIZE):
         for j in range(F_WIDTH/BLOCK_SIZE):
+            motionVecStartX=0
+            motionVecStartY=0
+            motionVecEndX=0
+            motionVecEndX=0
             refBlock=frame1[i*BLOCK_SIZE:i*BLOCK_SIZE+BLOCK_SIZE,j*BLOCK_SIZE:j*BLOCK_SIZE+BLOCK_SIZE,:]
             start_x=i*BLOCK_SIZE-SEARCH_WINDOW
             start_y = j * BLOCK_SIZE - SEARCH_WINDOW
@@ -29,13 +31,12 @@ def motionEstimator(frame1, frame2,f_count):
                 search_block=frame2[start_x:start_x+15,start_y:start_y+15,:]
                 s_MAD=np.sum(np.absolute(refBlock-searchBlock))
                 if s_MAD<min_MAD:
-                    min_MAD=s_MAD
-                    min_i=start_x
-                    min_j=start_y
-            print ("Frame No :%d - I:%d - J:%d - Minimum MAD:%d - Min I:%d - Min J :%d" %(f_count,i,j,min_MAD,start_x,start_y))
-            # cv2.imshow('block', ref_block)
-            # cv2.moveWindow("block",100,400)
-
+                    motionVecStartX = i * BLOCK_SIZE
+                    motionVecStartY = j * BLOCK_SIZE
+                    motionVecEndX=motionVecStartX+start_x
+                    motionVecEndY=motionVecStartY+start_y
+                    motionVector[i][j]=(motionVecStartX,motionVecStartY,motionVecEndX,motionVecEndY)
+    return motionVector
 
 #Reading from file
 cap = cv2.VideoCapture('./Input/foreman_cif.y4m')
@@ -51,9 +52,11 @@ while(cap.isOpened()):
     ret2, frame2 = cap.read()
     #print(frame1.dtype)
     if ret1 == True & ret2==True:
-        motionEstimator(frame1=frame1,frame2=frame2,f_count=F_COUNT)
+        motionVec=motionEstimator(frame1=frame1,frame2=frame2,f_count=F_COUNT)
+        print (motionVec.shape)
+        print motionVec
     cv2.imshow('frame',frame1)
     if cv2.waitKey(50) & 0xFF == ord('q'):
-        break
+            break
 cap.release()
 cv2.destroyAllWindows()
