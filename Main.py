@@ -13,17 +13,12 @@ F_WIDTH=0
 F_HEIGTH=0
 
 def motionEstimator(frame1, frame2):
-    frame1_padded=np.zeros((int(F_HEIGTH)+(BLOCK_SIZE*2),int(F_WIDTH)+(BLOCK_SIZE*2),3), dtype=np.uint8)
-    # print(frame1_padded.shape)
-    # print(frame1.shape)
-    frame1_padded[BLOCK_SIZE-1:(BLOCK_SIZE-1+int(F_HEIGTH)),BLOCK_SIZE-1:(BLOCK_SIZE-1+int(F_WIDTH)),:]=frame1
-    frame2_blocks=np.zeros((int(F_HEIGTH)/BLOCK_SIZE,int(F_WIDTH)/BLOCK_SIZE,3), dtype=np.uint8)
-    for i in range(frame2_blocks.shape[0]):
-        for j in range(frame2_blocks.shape[1]):
-            cv2.imshow("Chunks", frame2[i*BLOCK_SIZE:i*BLOCK_SIZE-1+BLOCK_SIZE,j*BLOCK_SIZE:j*BLOCK_SIZE-1+BLOCK_SIZE,:])
-            cv2.moveWindow("Chunks", 200, 700)
-    #cv2.imshow("padded",frame1_padded)
-    #cv2.moveWindow("padded", 0, 350)
+    block=np.zeros(((16,16,3)),np.uint8)
+    for i in range(1):
+        for j in range(1):
+            block=frame1[i*BLOCK_SIZE:i*BLOCK_SIZE+BLOCK_SIZE-1,j*BLOCK_SIZE:j*BLOCK_SIZE+BLOCK_SIZE-1,:]
+    cv2.imshow("b",block)
+    cv2.moveWindow("b", 0, 350)
 #Reading from file
 cap = cv2.VideoCapture('./Input/foreman_cif.y4m')
 F_WIDTH = cap.get(cv2.CAP_PROP_FRAME_WIDTH);
@@ -35,7 +30,7 @@ while(cap.isOpened()):
     _, frame2 = cap.read()
     #print(frame1.dtype)
     motionEstimator(frame1=frame1,frame2=frame2)
-    cv2.imshow('frame',frame1)
+    #cv2.imshow('frame',frame1)
     if cv2.waitKey(50) & 0xFF == ord('q'):
          break
 cap.release()
