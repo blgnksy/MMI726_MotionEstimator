@@ -1,3 +1,5 @@
 #Folders
 .idea/
-Input/
+
+#Output images
+*.png
