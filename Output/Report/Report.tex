@@ -1,0 +1,146 @@
+\documentclass[]{article}
+
+%opening
+\title{}
+\author{}
+
+\usepackage{lipsum}
+\usepackage[margin=2cm,left=2cm,includefoot]{geometry}
+
+\usepackage[hidelinks]{hyperref} %clickable references
+
+\usepackage{graphicx}%image
+\usepackage{float}%float position
+
+\usepackage{subfig}
+
+\usepackage[document]{ragged2e} %justify
+\usepackage{amsmath} %multiline equations
+
+\usepackage{listings}
+\usepackage{color}
+
+\lstset{frame=tb,
+  breaklines=true,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{blue}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  commentstyle=\color{green}\ttfamily,
+  morecomment=[l][\color{magenta}]{\#}
+}
+
+\begin{document}
+% Title Page
+\begin{titlepage}
+	\begin{center}
+		\line(10,0){400}\\
+		[4mm] %for add spacing
+		\huge{\bfseries Block Based Motion Estimation} \\
+		\huge{\bfseries Using Exhaustive Search-Diamond Search} \\
+		[1mm]
+		\line(10,0){400}\\
+		[1 cm]
+		\textsc{\LARGE Bilgin Aksoy}\\
+		[1 cm]
+		\textsc{\large MMI726-Multimedia Standards Assignment-I}\\
+		[10 cm]
+	\end{center}
+	
+	\begin{flushright}
+		\textsc{\large Bilgin Aksoy\\
+		MMI\\
+		2252286\\
+		22 November 2017\\
+		}
+	\end{flushright}
+\end{titlepage} 
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+
+
+\section{Block-Based Motion Estimation}
+	\justifying Video compression techniques use this block based motion estimation technique to boost the performance of the compression.  The block-based motion estimation technique has been successfully applied in the video compression standards from H.261 to H.264.  \cite{bachu2015review}The differences between adjacent frames of a video sequence are caused by moving objects, cameras, objects overlap each other, changes in illumination.\cite{andrey2016research} Block based motion technique simply divides reference image into blocks, searches each block in search window of the consecutive frame, calculates the motion vector, and the residual error between motion-compensated frame and original frame. In this assignment, Exhaustive and Diamond Search Algorithms are implemented, and compared by means of Peak Signal to Noise Ratio (PSNR) and computational cost. \\
+\section{Evaluation Metrics}
+	\justifying A metric for matching a reference block with search block is based on a cost function. In this assignment Mean Squared Error(MSE) (Equation-\ref{equ:MSE}) is used as a evaluation metric. Peak signal to noise ration is calculated in Equation-\ref{equ:PSNR}.
+			\vskip 1 cm
+			\begin{equation}
+					\label{equ:MSE}
+					\centering
+					MSE=
+					\frac{\displaystyle\sum_{j=1}^{N}\displaystyle\sum_{i=1}^{M}
+					(I_{1}(i,j)-I_{2}(i,j))^{2}}{M \times N}
+			\end{equation}
+			\vskip 1 cm
+			\begin{equation}
+	 				\label{equ:PSNR}
+	 				\centering
+	 				PSNR = 20log_{10} \frac {255^2}{\sqrt{MSE}}
+	 		\end{equation}
+			\vskip 1 cm
+\section{Exhaustive Search Algorithm}
+	\justifying Exhaustive Search Algorithm compares all possible displacements within the search window. This leads to the best possible match of the reference frame with a block in another frame. The resulting motion compensated image has highest peak signal-to-noise ratio as compared to any other block matching algorithm. However this is the most computationally extensive block matching algorithm. A larger search window requires greater number of computations. The computation time for  different search window ( $24 \times 24 $, $32 \times 32 $,  $48 \times 48 $ ) is on Table-  \ref{tab:table_1}. \textbf{But my Exhaustive Search implementation has a problem that I couldn't solve. So my PSNR for Exhaustive Search are lower than the diamond search algorithm for same search window sizes.} 
+	    \begin{table}[H] % H stands for here not anywhere else
+
+   			\begin{tabular}{c c c }
+   				Search Window Size & Average Time Per Block(sec) & Average Time Per Frame(sec)\\ \hline\hline 
+   				$24 \times 24 $ & 0.0000178813 & 0.017 \\  \hline
+   				$32 \times 32 $ & 0.0000309944 & 0.024 \\ \hline
+   				$48 \times 48 $ & 0.005992 & 0.24207 \\ \hline
+   			\end{tabular}
+   			\centering	
+   			\label{tab:table_1}	
+   			\caption[The Time-Consuming Of Different Search Window Size in Exhaustive Search]{The Time-Consuming Of Different Search Window Size in Exhaustive Search }
+   		\end{table}
+   		\begin{figure}[H]
+   				 	\centering
+   					\subfloat[\label{fig:mCompExh}Motion Compansated Image - Exhaustive Search]{\includegraphics[scale=0.65]{../mCompFrame_Exh_3.png}}
+   					\hfill
+   					\subfloat[\label{fig:resErrExh}Residual Error - Exhaustive Search]{\includegraphics[scale=0.65]{../resErrFrame_Exh_3.png}}
+   		\end{figure}
+   		\begin{figure}[H]
+   					 	\centering
+   						\subfloat[\label{fig:mCompDia}Motion Compansated Image - Diamond Search]{\includegraphics[scale=0.65]{../mCompFrame_Dia_3.png}}
+   						\hfill
+   						\subfloat[\label{fig:resErrDia}Residual Error - Diamond Search]{\includegraphics[scale=0.65]{../resErrFrame_Dia_3.png}}
+   			\end{figure}
+\section{Diamond Search Algorithm}	
+	\justifying Diamond search algorithm starts with Large Diamond Search Pattern. After the iteration that satisfy the condition of finding the minimum weight on center location,  Small Diamond Search Pattern calculates the minimum weight. Diamond Search algorithm has a peak signal-to-noise ratio close to that of Exhaustive Search with significantly less computational expense.\cite{wiki_block_based}
+	\begin{itemize}
+	\item Large Diamond Search Pattern (LDSP):
+		\begin{itemize}
+			\item Start with search location at center
+			\item Set step size ‘S’ = 2
+			\item Search 8 locations pixels (X,Y) such that (|X|+|Y|=S) around location (0,0) using a diamond search point pattern
+			\item Pick among the 9 locations searched, the one with minimum cost function
+			\item If the minimum weight is found at center for search window, go to SDSP step
+			\item If the minimum weight is found at one of the 8 locations other than the center, set the new origin to this location
+			\item Repeat LDSP
+		\end{itemize}
+	\item Small Diamond Search Pattern (SDSP):
+			\begin{itemize}
+				\item Set the new search origin
+				\item Set the new step size as S = S/2 = 1
+				\item Repeat the search procedure to find location with least weight
+				\item Select location with the least weight as motion vector
+			\end{itemize}
+	\end{itemize}
+\section{Conclusion}
+	\justifying Comparison of the two algorithm for block-based motion estimation is Table- \ref{tab:table_2}.	
+
+	\begin{table}[H] % H stands for here not anywhere else
+		\label{tab:table_2}	
+		\begin{tabular}{l c c c}
+			Algorithm & Average Time Per Block(sec) & Average Time Per Frame(sec) & Average PSNR (dB)\\ \hline\hline 
+			Exhaustive($24 \times 24  $) & 0.0000178813 & 0.017 & 11.0342\\  \hline
+			Diamond & 0.000011903 & 0.009153 & 21.3333\\ \hline
+		\end{tabular}
+		\centering	
+		\caption[The Time-Consuming Of Different Search Window Size in Exhaustive Search]{ The Time-Consuming Of Different Search Window Size in Exhaustive Search }
+	\end{table}
+		
+		
+\bibliography{References/ref.bib}
+\bibliographystyle{ieeetr}
+
+\end{document}
